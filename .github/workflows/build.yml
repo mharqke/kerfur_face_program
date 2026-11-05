@@ -38,12 +38,12 @@ jobs:
       - name: Build Windows
         if: runner.os == 'Windows'
         run: |
-          pyinstaller --clean --noconfirm --onefile --windowed --collect-all pygame --name KerfurFace src/led_face.py
+          pyinstaller --clean --noconfirm --onefile --windowed --collect-all pygame --name KerfurFace led_face.py
 
       - name: Build Linux
         if: runner.os == 'Linux'
         run: |
-          pyinstaller --clean --noconfirm --onedir --collect-all pygame --name KerfurFace src/led_face.py
+          pyinstaller --clean --noconfirm --onedir --collect-all pygame --name KerfurFace led_face.py
           tar -czf KerfurFace-Linux.tar.gz -C dist KerfurFace
 
       - name: Upload Windows artifact
