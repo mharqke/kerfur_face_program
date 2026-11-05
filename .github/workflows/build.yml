@@ -1,0 +1,71 @@
+
+name: Build Kerfur Face
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - os: windows-latest
+            name: Windows
+          - os: ubuntu-22.04
+            name: Linux
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pygame pyinstaller
+
+      - name: Build Windows
+        if: runner.os == 'Windows'
+        run: |
+          pyinstaller --clean --noconfirm --onefile --windowed --collect-all pygame --name KerfurFace src/led_face.py
+
+      - name: Build Linux
+        if: runner.os == 'Linux'
+        run: |
+          pyinstaller --clean --noconfirm --onedir --collect-all pygame --name KerfurFace src/led_face.py
+          tar -czf KerfurFace-Linux.tar.gz -C dist KerfurFace
+
+      - name: Upload Windows artifact
+        if: runner.os == 'Windows'
+        uses: actions/upload-artifact@v4
+        with:
+          name: KerfurFace-Windows
+          path: dist/KerfurFace.exe
+
+      - name: Upload Linux artifact
+        if: runner.os == 'Linux'
+        uses: actions/upload-artifact@v4
+        with:
+          name: KerfurFace-Linux
+          path: KerfurFace-Linux.tar.gz
+
+      - name: Publish GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/KerfurFace.exe
+            KerfurFace-Linux.tar.gz
+
