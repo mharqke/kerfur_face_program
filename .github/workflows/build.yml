@@ -31,6 +31,9 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Install dependencies
+        run: |
+          pip install pygame pyinstaller
 
       - name: Build Windows
         if: runner.os == 'Windows'
